@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         望城文旅-预约
 // @namespace    http://tampermonkey.net/
-// @version      2025-05-09
+// @version      2025-05-13
 // @description  try to take over the world!
 // @author       You
 // @match        https://github.com/duolabmeng6/duolabmeng6.github.io/issues/22
@@ -9,6 +9,7 @@
 // @include      https://reserve.chaoxing.com/front/third/apps/reserve/item/reserve**
 // @grant        GM_setValue
 // @grant        GM_getValue
+// @require      https://cdn.jsdelivr.net/npm/js-md5@0.8.3/src/md5.min.js
 // ==/UserScript==
 
 (function() {
@@ -39,13 +40,10 @@
 
     originalDate = new Date(originalDate + 'T12:26:25.461Z')
 
-    var onlod = false;
+    const loadedScripts = new Set();
+
     // 创建MutationObserver监控DOM变化
     const observer = new MutationObserver(function(mutations) {
-        console.log("onload");
-        if(onlod === true){
-            return;
-        }
         mutations.forEach(function(mutation) {
             mutation.addedNodes.forEach(function(node) {
                 if (node.nodeName === 'SCRIPT' &&
@@ -62,17 +60,22 @@
                             // 替换回字符串
                             newContent = newContent.replace(rule.match, "var serverNow = new Date('"+originalDate.toISOString()+"')");
                             modified = true;
-                            onlod = true;
                         }
                     });
 
                     // 如果有修改，替换script元素
                     if (modified) {
-                        const newScript = document.createElement('script');
-                        newScript.type = 'text/javascript';
-                        newScript.text = newContent;
-                        node.parentNode.replaceChild(newScript, node);
-                        console.log('Modified dynamic script:', newScript);
+                        const contentSign= md5(newContent);
+                        console.log(contentSign);
+                        if(!loadedScripts.has(contentSign)){
+                            const newScript = document.createElement('script');
+                            newScript.type = 'text/javascript';
+                            newScript.text = newContent;
+                            node.parentNode.replaceChild(newScript, node);
+                            loadedScripts.add(contentSign);
+                            console.log('Modified initial script:', newScript);
+
+                        }
                     }
                 }
             });
@@ -86,11 +89,8 @@
     });
 
     // 也检查初始加载的脚本
-    document.addEventListener('DOMContentLoaded', function() {
+/*     document.addEventListener('DOMContentLoaded', function() {
         const initialScripts = document.body.querySelectorAll('script[type="text/javascript"]:not([src])');
-        if(onlod == true){
-            return;
-        }
         initialScripts.forEach(script => {
             let modified = false;
             let newContent = script.textContent;
@@ -108,12 +108,16 @@
             });
 
             if (modified) {
-                const newScript = document.createElement('script');
-                newScript.type = 'text/javascript';
-                newScript.text = newContent;
-                script.parentNode.replaceChild(newScript, script);
-                console.log('Modified initial script:', newScript);
+                const contentSign= md5(newContent);
+                if(!loadedScripts.has(contentSign)){
+                    const newScript = document.createElement('script');
+                    newScript.type = 'text/javascript';
+                    newScript.text = newContent;
+                    script.parentNode.replaceChild(newScript, script);
+                    loadedScripts.add(contentSign);
+                    console.log('Modified initial script:', newScript);
+                }
             }
         });
-    });
+    }); */
 })();
