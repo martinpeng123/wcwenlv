@@ -66,7 +66,6 @@
                     // 如果有修改，替换script元素
                     if (modified) {
                         const contentSign= md5(newContent);
-                        console.log(contentSign);
                         if(!loadedScripts.has(contentSign)){
                             const newScript = document.createElement('script');
                             newScript.type = 'text/javascript';
@@ -74,7 +73,6 @@
                             node.parentNode.replaceChild(newScript, node);
                             loadedScripts.add(contentSign);
                             console.log('Modified initial script:', newScript);
-
                         }
                     }
                 }
