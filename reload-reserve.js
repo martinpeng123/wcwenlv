@@ -1656,6 +1656,7 @@
       },
       mounted: function () {
         var _this = this
+        console.log("reload mounted vue");
         operateData('data/apps/reserve/free/login', {reserveId: reserveId}).then(function (res) {
           if (res.success) {
             _this.freeLogin = res.data.freeLogin
