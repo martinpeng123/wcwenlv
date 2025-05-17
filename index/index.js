@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         wcwl-sign
+// @name         wcwl-index
 // @namespace    http://tampermonkey.net/
 // @version      1.1
 // @description  sign

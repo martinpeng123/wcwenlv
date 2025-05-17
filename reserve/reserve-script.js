@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         望城文旅-预约
+// @name         wcwl-reserve
 // @namespace    http://tampermonkey.net/
 // @version      2025-05-13
 // @description  try to take over the world!
