@@ -1,4 +1,3 @@
-<script type="text/javascript">
   require(['jquery', 'Vue', 'cookies', 'moment', 'popup', 'iosSelectCmp', 'reserveUtils', 'baseUtils'], function ($, Vue, Cookies, moment, popup, IosSelectCmp, reserveUtils, BaseUtils) {
     'use strict'
     var itemId = 'itemId_var'//预约对象ID
@@ -1668,4 +1667,3 @@
       }
     })
   })
-</script>
