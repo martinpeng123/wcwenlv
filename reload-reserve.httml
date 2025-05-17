@@ -1,0 +1,313 @@
+<div class="res_order" id="reserve_item_v2" v-cloak>
+  <ul class="order_top">
+    <li class="order_status free"><span></span>空闲</li>
+    <li class="order_status nofree"><span></span>已预约</li>
+    <li class="order_status other"><span></span>已约满/不可预约</li>
+  </ul>
+  <div class="order_cont">
+    <div class="data_top">
+      <div class="data_top_scroll">
+        <ul class="data_top_ul">
+          <template v-for="(item, index) in header">
+            <li class="data_top_lis">
+              <div class="th_div">
+                <div class="th_info">
+                  <h6 class="th_week">{{item.nWeek}}</h6>
+                  <p class="th_date">{{item.nDate | format('MM.DD')}}</p>
+                </div>
+              </div>
+            </li>
+          </template>
+        </ul>
+      </div>
+    </div>
+    <div class="data_cont bottom-menu-padding">
+      <div class="no_pre_data" v-if="header.length == 0">暂无可预约时间</div>
+      <div class="data_cont_scroll" v-else>
+        <div class="data_table" :class="{'custom-theme': isCustomTheme}">
+          <div class="data_row" v-for="(intervalList, allIntervalListIndex) in allIntervalList">
+            <ol class="data_per row1" :class="'row'+interval.height" v-for="(interval, intervalListIndex) in intervalList.intervalList">
+              <li class="data_td" @click.stop="choseIntervalData(intervalList.date, interval, intervalData, index, intervalListIndex, allIntervalListIndex)" :class="getIntervalClass(intervalData)" v-for="(intervalData, index) in interval.intervalDataList">
+                <div class="td_div">
+                  <div class="td_info">
+                    <template v-if="openTimeAlias&&intervalData.timeAlias">
+                      <p class="td_word" v-if="intervalData.timeAlias">{{intervalData.timeAlias}}</p>
+                      <p class="td_word" v-if="intervalData.endTimeAlias">-</p>
+                      <p class="td_word" v-if="intervalData.endTimeAlias">{{intervalData.endTimeAlias}}</p>
+                    </template>
+                    <p class="td_word" v-else>{{intervalData.startTime}}-{{intervalData.endTime}}</p>
+                    <p class="td_word" v-if="intervalData.available == 0">{{intervalData.pauseReason && intervalData.pauseReason != '' ? intervalData.pauseReason : '不可预约'}}</p>
+                    <p class="td_word" v-else-if="mySelfReserveJson[intervalData.id + '_' + intervalList.date]">已预约</p>
+                    <p class="td_word" v-else-if="intervalData.userShow">{{intervalData.userList[0].uname}}</p>
+                    <p class="td_num" v-else-if="balanceDisplay==1 && !teamReserve">
+                      {{intervalData.userCount?intervalData.userCount>=intervalData.userNum?intervalData.userNum:intervalData .userCount:0}}/{{intervalData.userNum}}
+                    </p>
+                    <p class="td_num" v-else-if="balanceDisplay==0 && intervalData.userCount && intervalData.userCount>=intervalData.userNum">
+                      已约满
+                    </p>
+                  </div>
+                </div>
+              </li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="order_btm bottom-menu-height">
+    <div class="order_btm_left">
+      <span class="order_btm_time" style="font-weight: 700;color: #ffeb3b" v-if="zgny && multipleSortChoseIntervalInfoArr.length==0">点击选择开始时间段和结束时间段</span>
+      <h6 class="order_btm_title" v-if="multipleSortChoseIntervalInfoArr.length>0">
+        <span>{{multipleSortChoseIntervalInfoArr[0].date}}</span>
+        <i class="show_time_arrow" @click="multipleIntervalInfoShow=!multipleIntervalInfoShow" v-if="multipleSortChoseIntervalInfoArr.length>1"></i>
+      </h6>
+      <p class="order_btm_hour" v-if="multipleSortChoseIntervalInfoArr.length>0">
+        {{multipleSortChoseIntervalInfoArr[0].startTime}}-{{multipleSortChoseIntervalInfoArr[0].endTime}}
+      </p>
+      <span class="order_btm_time" v-if="multipleSortChoseIntervalInfoArr.length>0">{{range}}</span>
+    </div>
+    <div class="order_btm_right" @click="submitReserveDialogShow">提交预约</div>
+    <div class="all_pre_time_pop" v-if="multipleSortChoseIntervalInfoArr.length>1 && multipleIntervalInfoShow">
+      <p class="preorder_time" v-for="(info, idx) in multipleSortChoseIntervalInfoArr">
+        {{info.date}} {{info.startTime}}-{{info.endTime}}
+      </p>
+    </div>
+  </div>
+  
+  <div class="sure_pop" v-show="showDetail">
+    <h6 class="res_pop_title">{{reserveItem.name}}</h6>
+    <div class="sure_pop_cont">
+      <div class="sure_pop_info">
+        <p class="sure_pop_word">创建人：<span style="color: #0d95e8">{{reserveItem.creatorUname}}</span></p>
+        <template v-for="item in reserveItem.propertyValues">
+          <p class="sure_pop_word">{{item.key}}： <span>{{item.value}}</span></p>
+        </template>
+      </div>
+    </div>
+    <div class="sure_pop_btm">
+      <span @click="showDetail=false">关闭</span>
+    </div>
+  </div>
+  
+  <div class="res_mask" v-if="submitReserveDialog.show || cancelReserveShowDialog.show || showDetail || pauseReason.show" @click="closeDialog"></div>
+  
+  <div class="sure_pop" v-if="submitReserveDialog.show">
+    <h6 class="res_pop_title">确认预约信息</h6>
+    <div class="sure_pop_cont">
+      <ul class="sure_pop_info">
+        <li class="sure_pop_per">
+          <h6 class="sure_pop_title">时间</h6>
+          <p class="sure_pop_detail" v-for="info in multipleSortChoseIntervalInfoArr">
+            {{info.date}} {{info.week}} {{info.startTime}}-{{info.endTime}}
+          </p>
+        </li>
+        <li class="sure_pop_per" v-show="timeAliasShow">
+          <h6 class="sure_pop_title">时间别名</h6>
+          <p class="sure_pop_detail" v-for="info in multipleSortChoseIntervalInfoArr" v-show="!!info.timeAlias">{{info.timeAlias}}</p>
+        </li>
+        <li class="sure_pop_per">
+          <h6 class="sure_pop_title">名称</h6>
+          <p class="sure_pop_detail">{{reserveItem.name}}</p>
+        </li>
+        <li class="sure_pop_per" v-show="effectiveReserveNum>1">
+          <h6 class="sure_pop_title">预约{{szxwzy ? '班' : '名' }}额(最多可预约{{effectiveReserveNum}}个{{szxwzy ? '班' : '名' }}额)</h6>
+          <div class="sure_pop_detail">
+            <span class="limited_minus" @click="subtractChoiceReserveNum"></span>
+            <input type="number" class="limited_num" v-model="choiceReserveNum" @input="validateNumber()" min="1" :max="effectiveReserveNum"/>
+            <span class="limited_add" @click="addChoiceReserveNum"></span>
+          </div>
+        </li>
+      </ul>
+      <div class="sure_pop_text" v-show="reserveItem.isMark != 0">
+        <h6 class="sure_text_tiele" v-if="reserve.id==13029">会议主题（必填） <span>{{submitReserveDialog.remark.length}}/50</span></h6>
+        <h6 class="sure_text_tiele" v-else>
+          <template v-if="tjcjdx">
+            预约信息（预约事由、部门、手机号）<label style="color: #ff7a93">*</label>
+          </template>
+          <template v-else>预约事由<label v-show="reserveItem.isMark == 2" style="color: #ff7a93">*</label></template>
+          <span>{{submitReserveDialog.remark.length}}/50</span></h6>
+        <textarea class="sure_area"
+                  :class="{error: isRequired}"
+                  :placeholder="cqjzgc ? '活动类别（学术研究类、学生活动类、教学活动类、特殊需求类）、活动名称、参与人员、活动审批情况等' : '请输入'"
+                  maxlength="50"
+                  v-model="submitReserveDialog.remark"
+                  @focus="isRequired=false">
+        </textarea>
+      </div>
+      <div class="sure_pop_text sure_pre_date" v-show="reserve.cycleType != 0" @click="goCyclePage">
+        <h6 class="sure_text_tiele">
+          周期预约
+          <span class="chose_date">
+            {{cycleReserve.cycleTips}}
+            <img class="right_arrow" src="https://reserve.chaoxing.com/staticreserve/style/apps/reserve/icons/ros_down.png" @click="goCyclePage" alt="">
+		      </span>
+        </h6>
+      </div>
+    </div>
+    <div class="sure_pop_btm">
+      <span @click="submitReserveDialogClose">关闭</span>
+      <span class="sure_btn" @click="submitReserve">确认</span>
+    </div>
+  </div>
+  
+  <div class="sure_pop" style="z-index: 12" v-show="cycleReserve.errorShow">
+    <h6 class="res_pop_title">确认预约信息</h6>
+    <div class="sure_pop_cont">
+      <div class="sure_pop_tip">
+        您预约的时间段中含有未开放时间或已约满时间点击继续预约则预约除冲突时间段外其余可预约时间，点击取消则取消本次周期预约
+      </div>
+      <div class="date_conf">
+        <h5 class="conf_title">冲突时间段</h5>
+        <ul class="conf_list">
+          <li v-for="item in cycleReserve.errList">{{item | errInfo()}}</li>
+        </ul>
+      </div>
+    </div>
+    <div class="sure_pop_btm">
+      <span @click="cancelCycleReserve">取消</span>
+      <span class="sure_btn" @click="confirmCycleReserve">继续预约</span>
+    </div>
+  </div>
+  
+  <div class="detail_info_pop_wrapper" v-show="reserveClash.show">
+    <div class="sure_pop detail_info_pop">
+      <h6 class="res_pop_title">部分预约冲突提示</h6>
+      <div class="sure_pop_cont">
+        <div class="date_conf pre_conf_tip">
+          <p class="conflict_tip">部分时间段存在冲突，请修改后重新提交预约。</p>
+          <p class="conflict_num" v-show="reserveClash.numLimitErrShow">当前预约数量已超过允许同时进行的预约数量（{{reserve.numLimit}}）个</p>
+          <div class="conf_time_wrap" v-show="reserveClash.totalDurationErrShow">
+            <p>{{ getTotalReserveTimeErrMsg() }}</p>
+            <p class="conf_time" v-for="user in reserveClash.list" v-show="user.errorType==0">
+              {{user.starttime | format('YYYY年MM月DD日 HH:mm')}}-{{user.endtime | format('HH:mm')}}
+            </p>
+          </div>
+          <div class="conf_time_wrap" v-show="reserveClash.existRserveShow">
+            <p>以下时间段当前已有预约</p>
+            <p class="conf_time" v-for="user in reserveClash.list" v-show="user.errorType==2">
+              {{user.starttime | format('YYYY年MM月DD日 HH:mm')}}-{{user.endtime | format('HH:mm')}}
+            </p>
+          </div>
+          <div class="conf_time_wrap" v-show="reserveClash.reserveNumErrShow">
+            <p>以下时间段当前已有预约</p>
+            <p class="conf_time" v-for="user in reserveClash.list" v-show="user.errorType==1">
+              {{user.starttime | format('YYYY年MM月DD日 HH:mm')}}-{{user.endtime | format('HH:mm')}}
+            </p>
+          </div>
+          <div class="conf_time_wrap" v-show="reserveClash.singleDurationErrShow">
+            <p>以下时间段当前已有预约</p>
+            <p class="conf_time" v-for="user in reserveClash.list" v-show="user.errorType==4">
+              {{user.starttime | format('YYYY年MM月DD日 HH:mm')}}-{{user.endtime | format('HH:mm')}}
+            </p>
+          </div>
+          <div class="conf_time_wrap" v-show="reserveClash.invalidErrShow">
+            <p>以下时间段当前已有预约</p>
+            <p class="conf_time" v-for="user in reserveClash.list" v-show="user.errorType==5">
+              {{user.starttime | format('YYYY年MM月DD日 HH:mm')}}-{{user.endtime | format('HH:mm')}}
+            </p>
+          </div>
+          <div class="conf_time_wrap" v-show="reserveClash.notOpenErrShow">
+            <p>以下时间段当前已有预约</p>
+            <p class="conf_time" v-for="user in reserveClash.list" v-show="user.errorType==6">
+              {{user.starttime | format('YYYY年MM月DD日 HH:mm')}}-{{user.endtime | format('HH:mm')}}
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="sure_pop_btm">
+        <span class="pre_btn" @click="closeErrorDialog">确定</span>
+      </div>
+    </div>
+  </div>
+  
+  <div class="set_repeat" v-show="cycleReserve.show" style="z-index: 12">
+    <div class="date_choice">
+      <div class="tips">{{cycleReserve.cycleTips}}</div>
+      <ul class="options">
+        <li class="option" @click="check(0)">无重复<img v-show="cycleReserve.type==0" src="https://reserve.chaoxing.com/staticreserve/style/apps/reserve/icons/checked.png" alt=""></li>
+        <li class="option" @click="check(1)">每天<img v-show="cycleReserve.type==1" src="https://reserve.chaoxing.com/staticreserve/style/apps/reserve/icons/checked.png" alt=""></li>
+        <li class="option" @click="check(2)">每周<img v-show="cycleReserve.type==2" src="https://reserve.chaoxing.com/staticreserve/style/apps/reserve/icons/checked.png" alt=""></li>
+        <li class="option" @click="check(3)">每两周<img v-show="cycleReserve.type==3" src="https://reserve.chaoxing.com/staticreserve/style/apps/reserve/icons/checked.png" alt=""></li>
+        <li class="option" @click="check(4)">每月<img v-show="cycleReserve.type==4" src="https://reserve.chaoxing.com/staticreserve/style/apps/reserve/icons/checked.png" alt=""></li>
+      </ul>
+    </div>
+    <div class="date_range" v-show="cycleReserve.type != 0">
+      <div class="option start_time" @click="selectCycleStartDate">
+        <span>开始重复日期</span>
+        <span class="enter_date_set">{{cycleReserve.cycleStartDate ? cycleReserve.cycleStartDate : '请选择'}}</span>
+      </div>
+      <div class="option end_time" @click="selectCycleEndDate">
+        <span>结束重复日期</span>
+        <span class="enter_date_set">{{cycleReserve.cycleEndDate ? cycleReserve.cycleEndDate : '请选择'}}</span>
+      </div>
+    </div>
+    <div class="confirm_btn" @click="confirm">确认</div>
+  </div>
+  
+  <div class="sure_pop" v-if="cancelReserveShowDialog.show">
+    <h6 class="res_pop_title">预约信息</h6>
+    <div class="sure_pop_cont">
+      <ul class="sure_pop_info">
+        <li class="sure_pop_per">
+          <h6 class="sure_pop_title">时间</h6>
+          <p class="sure_pop_detail">{{cancelReserveShowDialog.title}}</p>
+        </li>
+        <li class="sure_pop_per" v-show="!!cancelReserveShowDialog.timeAlias">
+          <h6 class="sure_pop_title">时间别名</h6>
+          <p class="sure_pop_detail">{{cancelReserveShowDialog.timeAlias}}</p>
+        </li>
+        <li class="sure_pop_per">
+          <h6 class="sure_pop_title">姓名</h6>
+          <p class="sure_pop_detail">{{cancelReserveShowDialog.userName}}</p>
+        </li>
+      </ul>
+      <div class="sure_pop_text">
+        <h6 class="sure_text_tiele" v-if="reserve.id==13029">会议主题（必填） </h6>
+        <h6 class="sure_text_tiele" v-else-if="tjcjdx">预约信息（预约事由、部门、手机号）<label style="color: #ff7a93">*</label></h6>
+        <h6 class="sure_text_tiele" v-else>预约事由<label v-show="reserveItem.isMark == 2" style="color: #ff7a93">*</label></h6>
+        <div>{{cancelReserveShowDialog.remark}}</div>
+      </div>
+    </div>
+    <div class="sure_pop_btm">
+      <span @click="cancelReserveShowDialog.show=false">关闭</span>
+      <span class="cal_btn" v-show="cancelReserveShowDialog.showCancelBtn" @click="cancelReserveConfirm">取消预约</span>
+    </div>
+  </div>
+  
+  <div class="up_mask" v-if="cancelReserveShowDialog.confirmShow"></div>
+  
+  <div class="cal_pop" v-if="cancelReserveShowDialog.confirmShow">
+    <div :class="[cancelReserveShowDialog.uuid && !teamReserve ? 'cal_title' : 'cal_top']">{{cancelReserveShowDialog.msg}}</div>
+    <div class="cal_cont" v-show="cancelReserveShowDialog.uuid && !teamReserve">
+      <span v-show="reserve.selectMode==0" class="check_box" :class="{'checked': cancelReserveShowDialog.allCancel==1}" @click="checkAllCancel"></span>
+      <span v-show="reserve.selectMode==0">同时取消后续周期预约</span>
+    </div>
+    <div class="cal_btm">
+      <span class="back" @click="cancelReserveShowDialog.confirmShow=false">返回</span>
+      <span class="cancel_pre" @click="cancelReserve">取消预约</span>
+    </div>
+  </div>
+  
+  <div class="tip_pop" v-if="reserveTips">
+    <p class="tip_pop_word">{{reserveTips.content}}</p>
+  </div>
+  
+  <div class="res_loading" v-if="loadingShow">
+    <div class="res_load_cont">
+      <div class="loading_iocn"></div>
+      <p class="loading_info">{{tipTitle}}</p>
+    </div>
+  </div>
+  
+  <div class="sure_pop pause_pop" v-show="pauseReason.show">
+    <h6 class="res_pop_title">暂停事由</h6>
+    <div class="sure_pop_cont">
+      <div class="sure_pop_cont">
+        <div class="pause_reason_text">{{pauseReason.text}}</div>
+      </div>
+    </div>
+    <div class="sure_pop_btm" @click.stop="pauseReason.show=false">
+      <span>关闭</span>
+    </div>
+  </div>
+</div>
