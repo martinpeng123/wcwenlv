@@ -9,6 +9,7 @@
 // @include      https://reserve.chaoxing.com/front/third/apps/reserve/item/reserve**
 // @require      https://cdn.jsdelivr.net/npm/js-md5@0.8.3/src/md5.min.js
 // @grant        GM_xmlhttpRequest
+// @run-at       document-body
 // ==/UserScript==
 
 (function() {

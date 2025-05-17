@@ -8,6 +8,7 @@
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=github.com
 // @include      https://reserve.chaoxing.com/front/third/apps/reserve/codeSign**
 // @require      https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js
+// @run-at       document-end
 // ==/UserScript==
 
 (function() {

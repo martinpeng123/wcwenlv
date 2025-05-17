@@ -6,6 +6,7 @@
 // @author       Your Name
 // @match        https://reserve.chaoxing.com/front/third/apps/reserve/item/index*
 // @grant        none
+// @run-at       document-body
 // ==/UserScript==
 
 (function() {
