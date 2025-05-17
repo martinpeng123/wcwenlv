@@ -1,5 +1,6 @@
   require(['jquery', 'Vue', 'cookies', 'moment', 'popup', 'iosSelectCmp', 'reserveUtils', 'baseUtils'], function ($, Vue, Cookies, moment, popup, IosSelectCmp, reserveUtils, BaseUtils) {
     'use strict'
+    console.log("start reload");
     var itemId = 'itemId_var'//预约对象ID
     var reserveId = 'reserveId_var'//预约应用ID
     var jumpType = '0'
