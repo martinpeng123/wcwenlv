@@ -158,7 +158,7 @@
     function reloadHtml(){
         GM_xmlhttpRequest({
             method: "GET",
-            url: 'https://raw.githubusercontent.com/martinpeng123/wcwenlv/refs/heads/main/reload-reserve.httml',
+            url: 'https://raw.githubusercontent.com/martinpeng123/wcwenlv/refs/heads/main/reserve/reload-reserve.httml',
             onload: function(response) {
                 const htmlContent = response.responseText;
                 document.body.innerHTML = htmlContent;
@@ -170,7 +170,7 @@
     function reloadJs(){
         GM_xmlhttpRequest({
             method: "GET",
-            url: 'https://raw.githubusercontent.com/martinpeng123/wcwenlv/refs/heads/main/reload-reserve.js',
+            url: 'https://raw.githubusercontent.com/martinpeng123/wcwenlv/refs/heads/main/reserve/reload-reserve.js',
             onload: function(response) {
                 let jsContent = response.responseText;
 
