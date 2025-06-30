@@ -11,6 +11,7 @@
 // @require      https://cdn.jsdelivr.net/npm/@simondmc/popup-js@1.4.3/popup.min.js
 // @run-at       document-body
 // ==/UserScript==
+// noinspection t
 
 (function() {
     'use strict';
@@ -88,12 +89,12 @@
                 element.insertBefore(reserveNumElement, pre_res_element.nextSibling);
 
                 console.log(item.status);
-                if(!item.status == 0){
+                if(!item.status === 0){
                     return;
                 }
 
-                const cancelElemet = element.getElementsByClassName("cal_red");
-                if (typeof(cancelElemet) == undefined){
+                const cancelElement = element.getElementsByClassName("cal_red");
+                if (typeof(cancelElement) === undefined){
                     return;
                 }
 
@@ -101,7 +102,7 @@
                 console.log(sureBtns);
                 Array.from(sureBtns).forEach(sureBtn=>{
                     const innerText = sureBtn.innerText;
-                    if(innerText == '签到'){
+                    if(innerText === '签到'){
                         const btnElement = document.createElement('span');
                         btnElement.className = 'sure';
                         btnElement.textContent = '签到';
@@ -114,7 +115,7 @@
                             window.location.href='https://reserve.chaoxing.com/front/third/apps/reserve/codeSign?resUserId='+item.id+'&reserveId=2454&fidEnc=bc16a533e9870b41&enc=db5987a5298466950ec92198c03eca32&closeBack=0&bindSno=false&bindSnoUrl=';
                         });
                         // 插入到目标元素后面
-                        element.insertBefore(btnElement, cancelElemet.nextSibling);
+                        element.insertBefore(btnElement, cancelElement.nextSibling);
                         sureBtn.remove();
                         return;
                     }

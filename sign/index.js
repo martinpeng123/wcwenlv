@@ -10,6 +10,7 @@
 // @require      https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js
 // @run-at       document-end
 // ==/UserScript==
+// noinspection t
 
 (function() {
     'use strict';
