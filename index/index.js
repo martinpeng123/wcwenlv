@@ -108,10 +108,10 @@
                         btnElement.textContent = '签到';
                         // 添加点击事件
                         btnElement.addEventListener('click', function() {
-                            if (!belongCalendar(vm, item)) {
-                                popup.alert('未到签到时间')
-                                return
-                            }
+                            // if (!belongCalendar(vm, item)) {
+                            //     popup.alert('未到签到时间')
+                            //     return
+                            // }
                             window.location.href='https://reserve.chaoxing.com/front/third/apps/reserve/codeSign?resUserId='+item.id+'&reserveId=2454&fidEnc=bc16a533e9870b41&enc=db5987a5298466950ec92198c03eca32&closeBack=0&bindSno=false&bindSnoUrl=';
                         });
                         // 插入到目标元素后面
