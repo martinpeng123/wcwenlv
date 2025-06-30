@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         wcwl-reserve-v1
+// @name         wcwl-reserve
 // @namespace    http://tampermonkey.net/
-// @version      2025-05-13
+// @version      1.0.0
 // @description  try to take over the world!
 // @author       You
 // @match        https://github.com/duolabmeng6/duolabmeng6.github.io/issues/22
