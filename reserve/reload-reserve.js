@@ -1,3 +1,5 @@
+  // noinspection t
+
   require(['jquery', 'Vue', 'cookies', 'moment', 'popup', 'iosSelectCmp', 'reserveUtils', 'baseUtils'], function ($, Vue, Cookies, moment, popup, IosSelectCmp, reserveUtils, BaseUtils) {
     'use strict'
     console.log("start reload");
@@ -469,7 +471,7 @@
         })
       })
     }
-    
+
     new Vue({
       el: '#reserve_item_v2',
       data: {
@@ -1164,6 +1166,7 @@
             fidEnc: fidEnc
           }).then(function (res) {
             if (!res.success) {
+              console.info('selectMode => ' + _this.reserve.selectMode)
               if (_this.reserve.selectMode === 0) {
                 popup.alert(res.msg, '确定', function () {
                   location.reload()
