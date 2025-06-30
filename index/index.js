@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         wcwl-index
 // @namespace    http://tampermonkey.net/
-// @version      1.2
+// @version      1.3
 // @description  sign
 // @author       Your Name
 // @match        https://reserve.chaoxing.com/front/third/apps/reserve/item/index*
