@@ -1169,8 +1169,9 @@
               console.info('selectMode => ' + _this.reserve.selectMode)
               if (_this.reserve.selectMode === 0) {
                 popup.alert(res.msg, '确定', function () {
-                  location.reload()
+                  // location.reload()
                 })
+                return;
               }
               if (_this.reserve.selectMode === 1 &&
                   res.hasOwnProperty('data') &&
